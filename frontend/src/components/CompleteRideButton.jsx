@@ -1,8 +1,14 @@
 import axios from "axios";
 
-export default function CompleteRideButton({ rideId }) {
-  const completeRide = async () => {
-    await axios.put(
+export default function CompleteRideButton({
+  rideId,
+  disabled,
+  onComplete,
+}) {
+  const handleComplete = async () => {
+    if (disabled) return; // 🔒 HARD BLOCK
+
+    await axios.post(
       `http://localhost:5000/rides/${rideId}/complete`,
       {},
       {
@@ -12,13 +18,18 @@ export default function CompleteRideButton({ rideId }) {
       }
     );
 
-    alert("Ride completed");
+    onComplete(); // 🔁 redirect
   };
 
   return (
     <button
-      onClick={completeRide}
-      className="bg-green-700 text-white px-4 py-2"
+      disabled={disabled}
+      onClick={handleComplete}
+      className={`px-4 py-2 rounded text-white ${
+        disabled
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-blue-600 hover:bg-blue-700"
+      }`}
     >
       Complete Ride
     </button>

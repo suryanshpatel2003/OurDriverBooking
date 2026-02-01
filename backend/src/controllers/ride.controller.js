@@ -155,3 +155,95 @@ export const cancelRideByClient = async (req, res) => {
     message: "Ride cancelled successfully",
   });
 };
+
+
+
+export const getDriverActiveRide = async (req, res) => {
+  const ride = await Ride.findOne({
+    driverId: req.user._id,
+    status: { $in: ["ON_RIDE", "DRIVER_ARRIVED"] },
+  });
+
+  if (!ride) {
+    return res.status(404).json({
+      success: false,
+      message: "No active ride found",
+    });
+  }
+
+  res.json({
+    success: true,
+    data: ride,
+  });
+};
+
+
+export const markPaymentReceived = async (req, res) => {
+  const ride = await Ride.findOne({
+    _id: req.params.rideId,
+    driverId: req.user._id,
+  });
+
+  if (!ride) {
+    return res.status(404).json({ message: "Ride not found" });
+  }
+
+  ride.paymentStatus = "PAID";
+  ride.paymentReceivedAt = new Date();
+  await ride.save();
+
+  const io = getIO();
+  io.to(ride._id.toString()).emit("payment_received");
+
+  res.json({
+    success: true,
+    message: "Payment marked as received",
+  });
+};
+
+
+
+export const completeRide = async (req, res) => {
+  const ride = await Ride.findOne({
+    _id: req.params.rideId,
+    driverId: req.user._id,
+  });
+
+  if (!ride) {
+    return res.status(404).json({
+      success: false,
+      message: "Ride not found",
+    });
+  }
+
+  // 🔒 HARD PAYMENT CHECK
+  if (ride.paymentStatus !== "PAID") {
+    return res.status(400).json({
+      success: false,
+      message: "Payment not completed yet",
+    });
+  }
+
+  if (ride.status !== "ON_RIDE") {
+    return res.status(400).json({
+      success: false,
+      message: "Ride cannot be completed in this state",
+    });
+  }
+
+  ride.status = "COMPLETED";
+  ride.completedAt = new Date();
+  ride.finalFareLocked = true;
+
+  await ride.save();
+
+  const io = getIO();
+  io.to(ride._id.toString()).emit("ride_status_update", {
+    status: "COMPLETED",
+  });
+
+  res.json({
+    success: true,
+    message: "Ride completed successfully",
+  });
+};

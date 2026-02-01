@@ -99,6 +99,15 @@ finalFareLocked: {
   default: "REQUESTED"
 },
 
+paymentStatus: {
+  type: String,
+  enum: ["UNPAID", "PAID"],
+  default: "UNPAID",
+},
+
+paymentReceivedAt: Date,
+
+
 
 
     cancelledAt: Date,

@@ -8,8 +8,13 @@ export default function ChatBox({ rideId }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
-  /* ===== LOAD CHAT + SOCKET ===== */
+  /* ===== JOIN RIDE + LOAD CHAT ===== */
   useEffect(() => {
+    if (!socket || !rideId) return;
+
+    // 🔥 ensure join immediately
+    socket.emit("join_ride", rideId);
+
     getChatHistory(rideId).then((res) => {
       setMessages(res.data.data);
     });
@@ -31,6 +36,8 @@ export default function ChatBox({ rideId }) {
   /* ===== UI ===== */
   return (
     <div className="border rounded p-3 flex flex-col h-64 bg-white">
+      <h3 className="font-semibold mb-2">Chat with Client</h3>
+
       <div className="flex-1 overflow-y-auto space-y-2">
         {messages.map((m, i) => (
           <div
