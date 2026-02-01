@@ -21,7 +21,7 @@ export default function Signup() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  /* ---------------- VALIDATIONS ---------------- */
+  /* ---------------- VALIDATION ---------------- */
 
   const validateEmail = () =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -87,7 +87,6 @@ export default function Signup() {
       });
 
       login(res.data.data.token, res.data.data.role);
-
       res.data.data.role === "client"
         ? navigate("/client")
         : navigate("/driver");
@@ -101,22 +100,31 @@ export default function Signup() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <form className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg space-y-6">
-        <h2 className="text-2xl font-semibold text-center text-slate-900">
-          Create your account
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-black px-4">
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-8 text-white">
 
+        {/* Brand */}
+        <h1 className="text-3xl font-bold text-center tracking-wide">
+          Driver<span className="text-indigo-400">Book</span>
+        </h1>
+        <p className="text-center text-sm text-white/70 mt-1">
+          Trusted drivers. Your car. Your control.
+        </p>
+
+        {/* Step Indicator */}
+        <StepIndicator step={step} />
+
+        {/* Error */}
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+          <div className="mt-4 text-sm bg-red-500/20 border border-red-500/40 text-red-200 p-3 rounded-lg">
             {error}
           </div>
         )}
 
-        {/* STEP 1 – EMAIL */}
+        {/* STEP 1 */}
         {step === "EMAIL" && (
-          <>
-            <Input
+          <form className="mt-6 space-y-4">
+            <GlassInput
               type="email"
               placeholder="Email address"
               value={email}
@@ -126,13 +134,13 @@ export default function Signup() {
             <PrimaryButton loading={loading} onClick={handleSendOTP}>
               Send OTP
             </PrimaryButton>
-          </>
+          </form>
         )}
 
-        {/* STEP 2 – OTP */}
+        {/* STEP 2 */}
         {step === "OTP" && (
-          <>
-            <Input
+          <form className="mt-6 space-y-4">
+            <GlassInput
               placeholder="Enter 6-digit OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
@@ -145,31 +153,31 @@ export default function Signup() {
             <button
               type="button"
               onClick={() => setStep("EMAIL")}
-              className="w-full text-sm text-slate-600 hover:text-slate-900"
+              className="w-full text-sm text-white/70 hover:text-white"
             >
               Change email
             </button>
-          </>
+          </form>
         )}
 
-        {/* STEP 3 – DETAILS */}
+        {/* STEP 3 */}
         {step === "DETAILS" && (
-          <>
-            <Input
+          <form className="mt-6 space-y-4">
+            <GlassInput
               placeholder="Full name"
               onChange={(e) =>
                 setForm({ ...form, name: e.target.value })
               }
             />
 
-            <Input
+            <GlassInput
               placeholder="Mobile number"
               onChange={(e) =>
                 setForm({ ...form, mobile: e.target.value })
               }
             />
 
-            <Input
+            <GlassInput
               type="password"
               placeholder="Password"
               onChange={(e) =>
@@ -177,34 +185,42 @@ export default function Signup() {
               }
             />
 
-            <select
-              className="w-full h-11 px-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-              onChange={(e) =>
-                setForm({ ...form, role: e.target.value })
-              }
-            >
-              <option value="client">Client</option>
-              <option value="driver">Driver</option>
-            </select>
+            {/* Role Selector */}
+            <div className="flex bg-white/10 rounded-lg p-1">
+              <RoleButton
+                active={form.role === "client"}
+                onClick={() => setForm({ ...form, role: "client" })}
+              >
+                Client
+              </RoleButton>
+              <RoleButton
+                active={form.role === "driver"}
+                onClick={() => setForm({ ...form, role: "driver" })}
+              >
+                Driver
+              </RoleButton>
+            </div>
 
             <PrimaryButton loading={loading} onClick={handleCompleteSignup}>
               Complete Signup
             </PrimaryButton>
-          </>
+          </form>
         )}
-      </form>
+      </div>
     </div>
   );
 }
 
-/* ---------------- REUSABLE UI ---------------- */
+/* ---------------- UI COMPONENTS ---------------- */
 
-function Input({ ...props }) {
+function GlassInput(props) {
   return (
     <input
       {...props}
-      className="w-full h-11 px-3 border border-slate-300 rounded-lg
-      focus:outline-none focus:ring-2 focus:ring-slate-900"
+      required
+      className="w-full h-11 rounded-lg bg-white/10 border border-white/30
+      px-3 placeholder:text-white/50 focus:outline-none focus:ring-2
+      focus:ring-indigo-500"
     />
   );
 }
@@ -214,10 +230,40 @@ function PrimaryButton({ children, loading, ...props }) {
     <button
       {...props}
       disabled={loading}
-      className="w-full h-11 bg-slate-900 text-white rounded-lg
-      hover:bg-slate-800 transition disabled:opacity-60"
+      className="w-full h-11 rounded-lg bg-indigo-600 hover:bg-indigo-500
+      transition font-medium shadow-lg disabled:opacity-60"
     >
       {loading ? "Please wait..." : children}
     </button>
+  );
+}
+
+function RoleButton({ active, children, ...props }) {
+  return (
+    <button
+      {...props}
+      type="button"
+      className={`flex-1 h-9 rounded-md text-sm font-medium transition
+        ${active ? "bg-indigo-600 shadow" : "text-white/70 hover:bg-white/10"}
+      `}
+    >
+      {children}
+    </button>
+  );
+}
+
+function StepIndicator({ step }) {
+  const steps = ["EMAIL", "OTP", "DETAILS"];
+  return (
+    <div className="mt-6 flex justify-between text-xs text-white/60">
+      {steps.map((s) => (
+        <span
+          key={s}
+          className={step === s ? "text-indigo-400 font-medium" : ""}
+        >
+          {s}
+        </span>
+      ))}
+    </div>
   );
 }
