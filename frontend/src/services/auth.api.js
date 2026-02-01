@@ -19,3 +19,8 @@ export const getMe = (token) =>
       Authorization: `Bearer ${token}`,
     },
   });
+
+
+  // src/services/auth.api.js
+export const sendLoginOTP = (email) =>
+  API.post("/login-otp", { email });

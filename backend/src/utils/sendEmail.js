@@ -1,25 +1,30 @@
+// src/utils/sendEmail.js
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT),
+  secure: false, // 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-export const sendOTPEmail = async (to, otp, purpose) => {
-  await transporter.sendMail({
-    from: `"Driver Booking App" <${process.env.EMAIL_USER}>`,
+transporter.verify((err) => {
+  if (err) console.error("❌ SMTP ERROR:", err);
+  else console.log("✅ SMTP READY");
+});
+
+export const sendEmail = async ({ to, subject, html }) => {
+  const info = await transporter.sendMail({
+    from: `"Driver Booking" <${process.env.EMAIL_USER}>`,
     to,
-    subject: `${purpose} OTP`,
-    html: `
-      <h2>${purpose} Verification</h2>
-      <p>Your OTP is:</p>
-      <h1>${otp}</h1>
-      <p>Valid for 5 minutes</p>
-    `,
+    subject,
+    html,
   });
+
+  console.log("📧 Mail sent:", info.messageId);
 };
