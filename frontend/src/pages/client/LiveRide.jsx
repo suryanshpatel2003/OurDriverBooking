@@ -91,7 +91,7 @@ export default function LiveRide() {
 
       {/* ACTIONS */}
       <div className="flex gap-3">
-        <CallButton phone="9999999999" />
+        <CallButton phone="7896541230" />
         <SOSButton rideId={rideId} />
       </div>
     </div>
